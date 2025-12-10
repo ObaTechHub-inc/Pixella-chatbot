@@ -1,4 +1,7 @@
-[< Home](index.md)
+---
+layout: default
+title: Get Started
+---
 
 # Getting Started with Pixella
 

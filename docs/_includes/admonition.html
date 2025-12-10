@@ -1,4 +1,4 @@
-<div class="admonition {{ include.type | default: 'note' }}">
-    <p class="admonition-title">{{ include.title | default: include.type | capitalize }}</p>
-    <p>{{ include.content }}</p>
+<div class="admonition {{ include.type }}">
+  <p class="admonition-title">{{ include.title }}</p>
+  <p>{{ include.content }}</p>
 </div>

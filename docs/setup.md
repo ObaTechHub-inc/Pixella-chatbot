@@ -1,4 +1,7 @@
-[< Home](index.md)
+---
+layout: default
+title: Setup and Configuration
+---
 
 # Setup and Configuration
 

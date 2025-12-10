@@ -42,46 +42,38 @@ table th {
   background: #0e0e0e !important;
   color: var(--primary);
 }
-
-/* -----------------------------------------------------
-   Admonition Blocks for GitHub Pages (No Plugin Needed)
-   ----------------------------------------------------- */
-
-/* Wrapper */
-.admonition {
-  border-left: 5px solid;
-  padding: 1rem 1.2rem;
-  margin: 1.5rem 0;
-  border-radius: 6px;
-  background: red !important; /* TEMPORARY DIAGNOSTIC */
-  color: #e0e0e0;
-}
-
-/* Title */
-.admonition-title {
-  font-weight: bold;
-  margin-bottom: 0.4rem;
-  text-transform: uppercase;
+/* Navbar */
+.site-nav {
+  margin-bottom: 2rem;
   font-size: 0.9rem;
-  letter-spacing: 0.5px;
 }
 
-/* ---- Colors ---- */
+.site-nav a {
+  color: #66bb6a; /* accent color */
+  text-decoration: none;
+  margin-right: 1rem;
+}
 
-.admonition.note      { border-color: #4aa3ff; }
-.admonition.warning   { border-color: #ffb300; }
-.admonition.tip       { border-color: #00e676; }
-.admonition.danger    { border-color: #ff5252; }
-.admonition.info      { border-color: #40c4ff; }
-.admonition.success   { border-color: #66bb6a; }
-.admonition.todo      { border-color: #ff80ab; }
+.site-nav a:hover {
+  text-decoration: underline;
+}
+/* Footer */
+.site-footer {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;
+  border-top: 1px solid #333;
+}
 
-/* Title coloring */
-.admonition.note .admonition-title      { color: #4aa3ff; }
-.admonition.warning .admonition-title   { color: #ffb300; }
-.admonition.tip .admonition-title       { color: #00e676; }
-.admonition.danger .admonition-title    { color: #ff5252; }
-.admonition.info .admonition-title      { color: #40c4ff; }
-.admonition.success .admonition-title   { color: #66bb6a; }
-.admonition.todo .admonition-title      { color: #ff80ab; }
-/* ----------------------------------------------------- */
+.site-footer a {
+  color: #66bb6a;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+/* ---- End of Custom Dark Mode Enhancements ---- */

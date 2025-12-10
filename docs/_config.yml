@@ -1,4 +1,4 @@
-theme: jekyll-theme-hacker
+theme: jekyll-theme-midnight
 title: Pixella Chatbot Docs
 description: Documentation for Pixella Chatbot
 highlighter: rouge
@@ -8,4 +8,5 @@ rouge:
 # Ensure custom CSS and favicon loads
 include:
   - assets/css/custom.css
+  - assets/css/admonition.css
   - assets/pixella_favicon.png

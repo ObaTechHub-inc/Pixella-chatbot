@@ -1,3 +1,16 @@
+---
+layout: default
+title: Home
+---
+# Welcome to PixelAI Docs
+
+{% include admonition.html 
+     type="note" 
+     title="Getting Started" 
+     content="Remember to read all the guides to set up PixelAI properly." 
+%}
+
+
 # Pixella Documentation
 
 ## About Pixella
