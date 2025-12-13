@@ -9,7 +9,7 @@ This document guides you through the process of installing Pixella, setting up i
 
 ## Quick Installation (Recommended)
 
-For a fast and automated setup, you can use our installation script, Though, it still has some issues due to collecting input(requires stdin) and we've been fixing it. This script will:
+For a fast and automated setup, you can use our installation script, This script will:
 
 1.  Detect your operating system (Linux, macOS, Windows/WSL/Git Bash).
 2.  Check for compatible Python (3.11+) and Git installations.

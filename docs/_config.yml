@@ -1,52 +1,65 @@
+# ==========================================================================
+# Site Settings
+# ==========================================================================
 title: Pixella Chatbot Docs
-description: Documentation for Pixella Chatbot
-highlighter: rouge
-rouge:
-  theme: github
+description: >- # Using >- helps manage newlines in the site's meta description.
+  Documentation for Pixella Chatbot. A powerful, open-source AI assistant.
+url: "https://obatechhub-inc.github.io" # The base hostname & protocol for your site.
+baseurl: "/Pixella-chatbot" # The subpath of your site, e.g., /blog
+repository: "ObaTechHub-inc/Pixella-chatbot" # Used by jekyll-seo-tag for rich metadata.
 
-markdown: kramdown
-kramdown:
-  input: GFM
-  hard_wrap: false
-  smart_quotes: lsquo,rsquo,ldquo,rdquo
-  syntax_highlighter_opts:
-    line_numbers: true
-theme: minima   # IMPORTANT
-plugins:
-  - jekyll-include-cache
-  - jekyll-feed
-  - jekyll-seo-tag
-  - jekyll-sitemap
-
-# Ensure custom CSS and favicon loads
+# ==========================================================================
+# Build Settings
+# ==========================================================================
+# By default, files starting with `_` or `.` are excluded.
+# These settings ensure that only necessary files are processed, improving build time.
 include:
   - _layouts
   - _includes
   - assets
 
-url: "https://obatechhub-inc.github.io"
-baseurl: "/Pixella-chatbot"
+exclude:
+  - .github/
+  - node_modules/
+  - scripts/
+  - Gemfile
+  - Gemfile.lock
+  - package.json
+  - package-lock.json
+  - README.md
+  - LICENSE
+  - CONTRIBUTING.md
 
+# ==========================================================================
+# Plugins
+# ==========================================================================
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-include-cache
+
+# ==========================================================================
+# Content & Markdown
+# ==========================================================================
+# Rouge is a fast, pure-Ruby code highlighter.
+highlighter: rouge
+rouge:
+  theme: github # Options: github, thankful_eyes, monokai, etc.
+
+markdown: kramdown
+kramdown:
+  input: GFM # Enables GitHub-Flavored Markdown.
+  hard_wrap: false
+  syntax_highlighter_opts:
+    line_numbers: true # Enables line numbers in code blocks.
+
+# ==========================================================================
+# Page Defaults
+# ==========================================================================
+# Default front matter for all pages and posts.
 defaults:
   - scope:
-      path: ""
+      path: "" # An empty string here means all files in the project.
     values:
       layout: "default"
-      description: "Documentation for Pixella Chatbot"
-      title: "Pixella Chatbot Docs"
-      permalink: "/:path/"
-
-# Minima theme overrides
-minima:
-  skin: dark
-  show_sidebar: true
-  sidebar:
-    logo: "/assets/images/pixella-logo.png"
-    logo_alt: "Pixella Logo"
-    logo_width: 150
-  navbar:
-    title: "Pixella Chatbot Docs"
-    logo: "/assets/images/pixella-logo.png"
-    logo_alt: "Pixella Logo"
-    logo_width: 50  
-  search_enabled: true

@@ -12,17 +12,6 @@
     {% include head.html %}
   </head>
   <body>
-    <!-- Documentation Sidebar -->
-    <button class="docs-sidebar-toggle" aria-label="Toggle table of contents">
-      <i class="fas fa-list"></i>
-    </button>
-    <aside class="docs-sidebar" aria-label="Table of contents">
-      <h3>Table of Contents</h3>
-      <nav id="sidebar-toc" class="sidebar-toc">
-        <!-- Table of contents will be generated here -->
-      </nav>
-    </aside>
-
     <!-- Site Navigation -->
     <nav class="site-nav" role="navigation">
       <div class="nav-container">
@@ -46,8 +35,21 @@
         </div>
       </div>
     </nav>
-    <!-- Main Content -->
-    <main class="main-content" role="main">{{ content }}</main>
+    <div class="page-wrapper">
+      <!-- Documentation Sidebar -->
+      <button class="docs-sidebar-toggle" aria-label="Toggle table of contents">
+        <i class="fas fa-list"></i>
+      </button>
+      <aside class="docs-sidebar" aria-label="Table of contents">
+        <h3>Table of Contents</h3>
+        <nav id="sidebar-toc" class="sidebar-toc">
+          <!-- Table of contents will be generated here -->
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content" role="main">{{ content }}</main>
+    </div>
     <!-- Footer -->
     <footer class="site-footer" role="contentinfo">
       <p>

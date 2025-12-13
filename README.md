@@ -81,18 +81,14 @@ This script will:
 
 ### 🚀 For Developers & Contributors
 
-**We strongly recommend using the automated installation script** for the best development experience:
+**We strongly recommend using the automated installation script** for users:
 
 ```bash
-# Clone the repository first
-git clone https://github.com/DominionDev-coder/Pixella-chatbot.git
-cd Pixella-chatbot
-
-# Run the installation script
-bash scripts/install.sh
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh)"
 ```
-
-This ensures you have the correct Python version, virtual environment, and all dependencies properly configured. See the [documentation](https://obatechhub-inc.github.io/Pixella-chatbot/develop.html) for detailed development setup instructions.
+This script will set up everything you need for development.
+See the [Installation docs](https://obatechhub-inc.github.io/Pixella-chatbot/installation.html)
+for more details.
 
 ### Manual Installation
 
