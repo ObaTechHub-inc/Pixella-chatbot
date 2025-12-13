@@ -4,19 +4,19 @@ title: Get Started
 
 ---
 
-# Getting Started with Pixella
+# ✅ Getting Started with Pixella
 
 This guide will help you quickly start using Pixella's Command-Line Interface (CLI) and Web User Interface (UI).
 
-## Prerequisites
+##  Prerequisites
 
 Before proceeding, ensure you have Pixella installed and configured. If not, please follow the [Installation Guide](installation.md) and [Setup and Configuration Guide](setup.md).
 
-## 1. Command-Line Interface (CLI)
+## 1. 🔨 Command-Line Interface (CLI)
 
 Pixella's CLI provides a powerful way to interact with the chatbot directly from your terminal.
 
-### Interactive Mode
+###  Interactive Mode
 
 To start an interactive chat session:
 
@@ -50,7 +50,7 @@ You can also specify a session to continue a conversation:
 pixella cli "Tell me more about it" --session my_travel_plans
 ```
 
-## 2. Web User Interface (UI)
+## 2. 🌐 Web User Interface (UI)
 
 Pixella also offers a user-friendly Web UI powered by Streamlit.
 

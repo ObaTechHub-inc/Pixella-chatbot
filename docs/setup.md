@@ -4,7 +4,7 @@ title: Setup and Configuration
 
 ---
 
-# Setup and Configuration
+# ⚙️ Setup and Configuration
 
 This document details how to set up and configure Pixella for optimal use. Configuration is primarily managed through environment variables, which can be easily set using a `.env` file or interactively via the CLI.
 
@@ -91,6 +91,6 @@ You can manage individual configuration settings using the `pixella config` comm
     pixella config --restore
     ```
 
-## 4. API Quota Reminder
+## 4. ⚠️ API Quota Reminder
 
 **Important:** When using Google Generative AI models, be aware of your API usage limits and quotas. Exceeding these limits can lead to service interruptions. Monitor your usage through the Google Cloud Console.

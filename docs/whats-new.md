@@ -4,7 +4,7 @@ title: What's New
 
 ---
 
-# What's New in Pixella v1.20 (1.20.7)
+# 🆕 What's New in Pixella v1.20 (1.20.7)
 
 Welcome to the release notes for Pixella v1.20 (1.20.7)! This version introduces several new features, improvements, and bug fixes to enhance your experience with Pixella. Below is a summary of the key changes:
 

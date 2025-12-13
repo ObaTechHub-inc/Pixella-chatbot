@@ -4,7 +4,7 @@ title: Home
 
 ---
 
-# Welcome to PixelAI Docs
+# 📘 Welcome to PixelAI Docs
 
 {% include admonition.html
      type="note"
@@ -12,13 +12,13 @@ title: Home
      content="Remember to read all the guides to set up PixelAI properly."
 %}
 
-# Pixella Documentation
+# 📖 Pixella Documentation
 
 ## About Pixella
 
 Pixella is a powerful, open-source AI assistant designed to enhance your productivity and streamline your workflows. With both a flexible Command-Line Interface (CLI) and an intuitive Web User Interface (UI), Pixella provides easy access to cutting-edge AI capabilities directly from your terminal or browser. It's built to be easily configurable and extendable, allowing you to tailor its behavior to your specific needs.
 
-## What's New
+## 🆕 What's New
 
 For the latest updates and features in Pixella, check out the [What's New](whats-new.md) page.
 

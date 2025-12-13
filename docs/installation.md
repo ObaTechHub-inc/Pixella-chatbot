@@ -4,11 +4,11 @@ title: Installation
 
 ---
 
-# Installation
+# 🪛 Installation
 
 This document guides you through the process of installing Pixella, setting up its dependencies, and getting it ready for use.
 
-## Quick Installation (Recommended)
+## ⚡ Quick Installation (Recommended)
 
 For a fast and automated setup, you can use our installation script, This script will:
 
@@ -40,7 +40,7 @@ Not Available Yet, use Git Bash or WSL instead.
 
 After the script completes, follow the prompts for initial configuration.
 
-## Prerequisites
+## 📝 Prerequisites
 
 Before installing Pixella, ensure you have the following installed on your system:
 
@@ -50,7 +50,7 @@ Before installing Pixella, ensure you have the following installed on your syste
 
 The installation script will handle `pip` and virtual environment setup automatically.
 
-## Step-by-Step Installation
+## ▶️ Step-by-Step Installation
 
 If you prefer a manual setup or need to troubleshoot, Also recommend for developers(contributors), follow these steps:
 
