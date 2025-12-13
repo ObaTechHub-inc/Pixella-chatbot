@@ -1,4 +1,17 @@
 <div class="admonition {{ include.type }}">
   <p class="admonition-title">{{ include.title }}</p>
+  <p class="admonition-icon">
+    {% if include.type == "note" %}
+      <i class="fas fa-info-circle"></i>
+    {% elsif include.type == "warning" %}
+      <i class="fas fa-exclamation-triangle"></i>
+    {% elsif include.type == "tip" %}
+      <i class="fas fa-lightbulb"></i>
+    {% elsif include.type == "important" %}
+      <i class="fas fa-exclamation-circle"></i>
+    {% else %}
+      <i class="fas fa-info-circle"></i>
+    {% endif %}
+  </p>
   <p>{{ include.content }}</p>
 </div>

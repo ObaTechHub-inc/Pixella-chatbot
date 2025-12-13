@@ -1,10 +1,6 @@
 <meta charset="utf-8" />
 <meta name="theme-color" content="#121212" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-/>
 <link rel="stylesheet" href="{{ '/assets/css/custom.css' | relative_url }}" />
 <link
   rel="stylesheet"
@@ -20,6 +16,46 @@
   document.addEventListener("DOMContentLoaded", function () {
     // Mobile detection - disable problematic features on mobile
     const isMobile = window.innerWidth <= 768;
+    const isDesktop = window.innerWidth >= 1024;
+
+    // Theme toggle functionality
+    const themeToggle = document.createElement("button");
+    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    themeToggle.className = "theme-toggle";
+    themeToggle.setAttribute("aria-label", "Toggle theme");
+    themeToggle.title = "Toggle dark/light mode";
+
+    // Insert theme toggle in navigation
+    const navContainer = document.querySelector(".nav-container");
+    if (navContainer) {
+      navContainer.appendChild(themeToggle);
+    }
+
+    // Load saved theme or detect system preference
+    const savedTheme = localStorage.getItem("theme");
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const initialTheme = savedTheme || (systemPrefersDark ? "dark" : "light");
+
+    document.documentElement.setAttribute("data-theme", initialTheme);
+    updateThemeIcon(initialTheme);
+
+    themeToggle.addEventListener("click", function () {
+      const currentTheme = document.documentElement.getAttribute("data-theme");
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+      themeToggle.innerHTML =
+        theme === "dark"
+          ? '<i class="fas fa-sun"></i>'
+          : '<i class="fas fa-moon"></i>';
+    }
 
     // Navigation toggle functionality
     const navToggle = document.querySelector(".nav-toggle");
@@ -68,39 +104,45 @@
       }
     });
 
-    // Documentation sidebar functionality (disabled on mobile)
-    if (!isMobile) {
-      const sidebarToggle = document.querySelector(".docs-sidebar-toggle");
-      const sidebar = document.querySelector(".docs-sidebar");
+    // Documentation sidebar functionality
+    const sidebarToggle = document.querySelector(".docs-sidebar-toggle");
+    const sidebar = document.querySelector(".docs-sidebar");
 
-      if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener("click", function () {
-          sidebar.classList.toggle("open");
-          const expanded = sidebar.classList.contains("open");
-          this.setAttribute("aria-expanded", expanded);
-          document.body.classList.toggle("sidebar-open", expanded);
-        });
+    if (sidebar) {
+      // Make sidebar permanent on desktop
+      if (isDesktop) {
+        sidebar.classList.add("permanent");
+      } else if (!isMobile) {
+        // Mobile sidebar toggle functionality
+        if (sidebarToggle) {
+          sidebarToggle.addEventListener("click", function () {
+            sidebar.classList.toggle("open");
+            const expanded = sidebar.classList.contains("open");
+            this.setAttribute("aria-expanded", expanded);
+            document.body.classList.toggle("sidebar-open", expanded);
+          });
 
-        // Close sidebar when clicking outside
-        document.addEventListener("click", function (e) {
-          if (
-            !sidebar.contains(e.target) &&
-            !sidebarToggle.contains(e.target)
-          ) {
-            sidebar.classList.remove("open");
-            sidebarToggle.setAttribute("aria-expanded", "false");
-            document.body.classList.remove("sidebar-open");
-          }
-        });
+          // Close sidebar when clicking outside
+          document.addEventListener("click", function (e) {
+            if (
+              !sidebar.contains(e.target) &&
+              !sidebarToggle.contains(e.target)
+            ) {
+              sidebar.classList.remove("open");
+              sidebarToggle.setAttribute("aria-expanded", "false");
+              document.body.classList.remove("sidebar-open");
+            }
+          });
 
-        // Close sidebar on navigation
-        sidebar.addEventListener("click", function (e) {
-          if (e.target.tagName === "A") {
-            sidebar.classList.remove("open");
-            sidebarToggle.setAttribute("aria-expanded", "false");
-            document.body.classList.remove("sidebar-open");
-          }
-        });
+          // Close sidebar on navigation
+          sidebar.addEventListener("click", function (e) {
+            if (e.target.tagName === "A") {
+              sidebar.classList.remove("open");
+              sidebarToggle.setAttribute("aria-expanded", "false");
+              document.body.classList.remove("sidebar-open");
+            }
+          });
+        }
       }
 
       // Active navigation highlighting for sidebar
@@ -140,7 +182,9 @@
     if (!content || !sidebarToc) return;
 
     const headings = content.querySelectorAll("h1, h2, h3, h4, h5, h6");
-    if (headings.length < 2) {
+    const lists = content.querySelectorAll("ul, ol");
+
+    if (headings.length < 1 && lists.length < 1) {
       sidebarToc.innerHTML =
         '<p class="no-toc">No table of contents available</p>';
       return;
@@ -150,6 +194,7 @@
     const tocList = document.createElement("ul");
     tocList.className = "toc-list";
 
+    // Add headings to TOC
     headings.forEach((heading, index) => {
       const level = parseInt(heading.tagName.charAt(1));
       const id = heading.id || `heading-${index}`;
@@ -160,6 +205,30 @@
       listItem.innerHTML = `<a href="#${id}" class="toc-link">${heading.textContent}</a>`;
 
       tocList.appendChild(listItem);
+    });
+
+    // Add lists to TOC if they have meaningful content
+    lists.forEach((list, index) => {
+      const listItems = list.querySelectorAll("li");
+      if (listItems.length > 0 && listItems.length <= 10) {
+        // Only include reasonable-sized lists
+        const listId = `list-${index}`;
+        list.id = listId;
+
+        // Get a preview of the list content
+        const firstItem = listItems[0].textContent.substring(0, 30);
+        const listType =
+          list.tagName.toLowerCase() === "ol" ? "numbered" : "bulleted";
+        const listTitle = `${listType} list: ${firstItem}${
+          firstItem.length >= 30 ? "..." : ""
+        }`;
+
+        const listItem = document.createElement("li");
+        listItem.className = "toc-item toc-list";
+        listItem.innerHTML = `<a href="#${listId}" class="toc-link">${listTitle}</a>`;
+
+        tocList.appendChild(listItem);
+      }
     });
 
     sidebarToc.innerHTML = "";
@@ -198,43 +267,46 @@
 
   // Code copying functionality
   function initializeCodeCopying() {
-    const codeBlocks = document.querySelectorAll("pre, code");
-
+    // Handle code blocks (pre elements)
+    const codeBlocks = document.querySelectorAll("pre");
     codeBlocks.forEach((block) => {
-      if (block.closest("pre")) return; // Skip if it's inside a pre
+      // Skip if already wrapped
+      if (block.closest(".code-block-wrapper")) return;
 
-      // For inline code
-      if (block.tagName === "CODE") {
-        block.style.cursor = "pointer";
-        block.title = "Click to copy";
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-block-wrapper";
 
-        block.addEventListener("click", function () {
-          copyToClipboard(this.textContent);
-          showCopyFeedback(this);
-        });
-      }
-      // For code blocks
-      else if (block.tagName === "PRE") {
-        const wrapper = document.createElement("div");
-        wrapper.className = "code-block-wrapper";
-        wrapper.style.position = "relative";
+      const copyButton = document.createElement("button");
+      copyButton.className = "code-copy-btn";
+      copyButton.innerHTML = '<i class="fas fa-copy"></i>';
+      copyButton.title = "Copy code";
+      copyButton.setAttribute("aria-label", "Copy code block");
 
-        const copyButton = document.createElement("button");
-        copyButton.className = "code-copy-btn";
-        copyButton.innerHTML = '<i class="fas fa-copy"></i>';
-        copyButton.title = "Copy code";
-        copyButton.setAttribute("aria-label", "Copy code block");
+      copyButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const code = block.querySelector("code") || block;
+        copyToClipboard(code.textContent.trim());
+        showCopyFeedback(this);
+      });
 
-        copyButton.addEventListener("click", function () {
-          const code = block.querySelector("code") || block;
-          copyToClipboard(code.textContent);
-          showCopyFeedback(this);
-        });
+      block.parentNode.insertBefore(wrapper, block);
+      wrapper.appendChild(block);
+      wrapper.appendChild(copyButton);
+    });
 
-        block.parentNode.insertBefore(wrapper, block);
-        wrapper.appendChild(block);
-        wrapper.appendChild(copyButton);
-      }
+    // Handle inline code (code elements not inside pre)
+    const inlineCodes = document.querySelectorAll("code");
+    inlineCodes.forEach((code) => {
+      if (code.closest("pre")) return; // Skip code inside pre blocks
+
+      code.style.cursor = "pointer";
+      code.title = "Click to copy";
+
+      code.addEventListener("click", function () {
+        copyToClipboard(this.textContent.trim());
+        showCopyFeedback(this);
+      });
     });
   }
 
@@ -352,6 +424,32 @@
       searchResults.style.display = "block";
     }
 
+    // Wrap search results click to navigate
+    searchResults.addEventListener("click", (e) => {
+      if (e.target.tagName === "A") {
+        searchResults.style.display = "none";
+      }
+    });
+
+    // let the navbar hamburger toggle work on mobile and show search bar properly
+    const navToggle = document.querySelector(".navbar-toggle");
+    if (navToggle) {
+      navToggle.addEventListener("click", () => {
+        const sidebar = document.querySelector(".sidebar");
+        if (sidebar) {
+          sidebar.classList.toggle("active");
+        }
+      });
+    }
+
+    // make sure sidebar and page content fit well on desktop
+    if (window.innerWidth >= 1024) {
+      const sidebar = document.querySelector(".docs-sidebar");
+      if (sidebar) {
+        sidebar.classList.add("permanent");
+      }
+    }
+
     // Event listeners
     searchButton.addEventListener("click", () => {
       performSearch(searchInput.value);
@@ -376,8 +474,13 @@
         searchResults.style.display = "none";
       }
     });
+    // Allow page and sidebar to fit well and avoid overlap, shift the page content when sidebar is permanent
+    document.body.style.paddingTop = "100px";
+    document.body.style.paddingLeft = "250px";
+    document.body.style.paddingRight = "20px";
+
 
     // Build index on load
     buildSearchIndex();
-  }
+    }
 </script>

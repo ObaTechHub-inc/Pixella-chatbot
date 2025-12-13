@@ -9,7 +9,7 @@ This document guides you through the process of installing Pixella, setting up i
 
 ## Quick Installation (Recommended)
 
-For a fast and automated setup, you can use our installation script. This script will:
+For a fast and automated setup, you can use our installation script, Though, it still has some issues due to collecting input(requires stdin) and we've been fixing it. This script will:
 
 1.  Detect your operating system (Linux, macOS, Windows/WSL/Git Bash).
 2.  Check for compatible Python (3.11+) and Git installations.
@@ -23,20 +23,19 @@ For a fast and automated setup, you can use our installation script. This script
 10. Verify the installation.
 
 Open your terminal and run one of the following commands:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh | sh
-```
-or
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh | bash
-```
-Those commands may fail, try this instead:
+- **For macOS/Linux:**
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh)"
 ```
+- **For Windows (Git Bash/WSL):**
+
+```bash
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh)"
+```
+- **For Windows (PowerShell):**
+
+Not Available Yet, use Git Bash or WSL instead.
 
 After the script completes, follow the prompts for initial configuration.
 
@@ -62,6 +61,7 @@ Open your terminal or command prompt and clone the Pixella repository:
 git clone https://github.com/DominionDev-coder/Pixella-chatbot.git # Make sure this is the correct repository URL
 cd Pixella-chatbot
 ```
+Since it Cloned, the installation script is also available in the `scripts/` directory and works well when cloned.
 
 ### 2. Create and Activate a Virtual Environment
 

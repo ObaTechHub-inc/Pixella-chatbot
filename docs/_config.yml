@@ -2,14 +2,21 @@ title: Pixella Chatbot Docs
 description: Documentation for Pixella Chatbot
 highlighter: rouge
 rouge:
-  theme: monokai
+  theme: github
 
 markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  smart_quotes: lsquo,rsquo,ldquo,rdquo
+  syntax_highlighter_opts:
+    line_numbers: true
 theme: minima   # IMPORTANT
 plugins:
   - jekyll-include-cache
   - jekyll-feed
   - jekyll-seo-tag
+  - jekyll-sitemap
 
 # Ensure custom CSS and favicon loads
 include:
@@ -25,3 +32,21 @@ defaults:
       path: ""
     values:
       layout: "default"
+      description: "Documentation for Pixella Chatbot"
+      title: "Pixella Chatbot Docs"
+      permalink: "/:path/"
+
+# Minima theme overrides
+minima:
+  skin: dark
+  show_sidebar: true
+  sidebar:
+    logo: "/assets/images/pixella-logo.png"
+    logo_alt: "Pixella Logo"
+    logo_width: 150
+  navbar:
+    title: "Pixella Chatbot Docs"
+    logo: "/assets/images/pixella-logo.png"
+    logo_alt: "Pixella Logo"
+    logo_width: 50  
+  search_enabled: true

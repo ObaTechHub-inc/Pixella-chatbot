@@ -354,7 +354,7 @@ Access at: `http://localhost:8501`
 
 ### RAG (Retrieval-Augmented Generation)
 
-Import documents to enhance chatbot responses:
+Import documents to enhance chatbot responses, This is not perfect or working yet.:
 
 ```bash
 # From CLI (interactive mode)
@@ -370,7 +370,7 @@ Import documents to enhance chatbot responses:
 
 ### Session Management
 
-Save and manage conversations:
+Save and manage conversations, has some issues currently:
 
 ```bash
 # List sessions

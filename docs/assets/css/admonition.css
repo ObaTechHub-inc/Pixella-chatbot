@@ -11,6 +11,8 @@
   overflow: hidden;
 }
 
+/* Decorative top border */
+
 .admonition::before {
   content: "";
   position: absolute;
