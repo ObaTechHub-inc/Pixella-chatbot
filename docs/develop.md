@@ -149,10 +149,10 @@ tail -f pixella.log
 ### Working with Git
 1.  **Create a new branch** for your feature or bugfix:
     ```bash
-    # Create a feature branch
-    git checkout -b feature/your-feature-name
-    # or for bugfix
-    git checkout -b bugfix/issue-number```
+      # Create a feature branch
+      git checkout -b feature/your-feature-name
+      # or for bugfix
+      git checkout -b bugfix/issue-number
   Start coding!
 
 2. Create a .gitignore file to exclude unnecessary files:
