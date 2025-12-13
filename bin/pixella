@@ -1,37 +1,50 @@
-#!/bin/bash
-# Pixella - CLI Wrapper
-# This script activates the virtual environment (if it exists) and runs the Pixella entrypoint.
+#!/usr/bin/env bash
+# Pixella Chatbot - CLI Wrapper
+# Activates virtual environment (if present) and runs Pixella entrypoint
 
-# Get the script's directory (i.e., the bin directory)
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-# Project root is one level up from the script directory
-PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
+set -Eeuo pipefail
 
-# Define virtual environment path relative to project root
+###############################################################################
+# Resolve paths
+###############################################################################
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 VENV_DIR="$PROJECT_ROOT/.venv"
-PYTHON_CMD="Python3.11" # Default to recommended python
+PYTHON_CMD="python3.11"
 
-# Determine OS and activation command for venv
+###############################################################################
+# Check for Python command
+###############################################################################
+command -v "$PYTHON_CMD" >/dev/null 2>&1 || {
+  echo "Pixella error: Python not found"
+  exit 1
+}
+
+###############################################################################
+# Detect OS and venv python
+###############################################################################
 case "$(uname -s)" in
-    Linux*|Darwin*)
-        VENV_PYTHON_BIN="\"$VENV_DIR/bin/python\""
-        VENV_ACTIVATE_CMD="source \"$VENV_DIR/bin/activate\""
-        ;;
-    CYGWIN*|MINGW32*|MSYS*|windows*)
-        VENV_PYTHON_BIN="\"$VENV_DIR/Scripts/python.exe\""
-        VENV_ACTIVATE_CMD="source \"$VENV_DIR/Scripts/activate\""
-        ;;
-    *)
-        echo "Error: Unsupported OS for Pixella wrapper."
-        exit 1
-        ;;
+  Linux*|Darwin*)
+    VENV_PYTHON_BIN="$VENV_DIR/bin/python"
+    ;;
+  CYGWIN*|MINGW*|MSYS*)
+    VENV_PYTHON_BIN="$VENV_DIR/Scripts/python.exe"
+    ;;
+  *)
+    echo "Error: Unsupported OS"
+    exit 1
+    ;;
 esac
 
-# If a virtual environment exists, activate it and use its python
-if [ -d "$VENV_DIR" ]; then
-    eval "$VENV_ACTIVATE_CMD"
-    PYTHON_CMD="$VENV_PYTHON_BIN"
+###############################################################################
+# Use virtualenv if it exists
+###############################################################################
+if [ -x "$VENV_PYTHON_BIN" ]; then
+  PYTHON_CMD="$VENV_PYTHON_BIN"
 fi
 
-# Execute the main entrypoint with all arguments
-$PYTHON_CMD "$PROJECT_ROOT/entrypoint.py" "$@"
+###############################################################################
+# Execute Pixella
+###############################################################################
+"$PYTHON_CMD" "$PROJECT_ROOT/entrypoint.py" "$@"
