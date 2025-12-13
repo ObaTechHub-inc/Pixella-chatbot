@@ -2,7 +2,7 @@ title: Pixella Chatbot Docs
 description: Documentation for Pixella Chatbot
 highlighter: rouge
 rouge:
-  theme: github
+  theme: monokai
 
 markdown: kramdown
 theme: minima   # IMPORTANT

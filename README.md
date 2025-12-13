@@ -3,7 +3,7 @@
 **A powerful, production-ready chatbot system with CLI and Web UI, powered by Google Generative AI**
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-1.20.7-blue)](version)
+[![Version](https://img.shields.io/badge/version-v1.20.7-blue)](version)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status: Active](https://img.shields.io/badge/status-active-brightgreen)]()
 
@@ -60,7 +60,7 @@ Use the provided installation script:
 
 ```bash
 # Navigate to Pixella directory (if not already there)
-# cd Pixella 
+# cd Pixella
 
 # Run installation script
 bash scripts/install.sh
@@ -78,6 +78,21 @@ This script will:
 8.  Prompt for your Google API Key and save it to `.env`.
 9.  Create a `pixella` command wrapper in `bin/` and add it to your shell's PATH.
 10. Verify the installation.
+
+### 🚀 For Developers & Contributors
+
+**We strongly recommend using the automated installation script** for the best development experience:
+
+```bash
+# Clone the repository first
+git clone https://github.com/DominionDev-coder/Pixella-chatbot.git
+cd Pixella-chatbot
+
+# Run the installation script
+bash scripts/install.sh
+```
+
+This ensures you have the correct Python version, virtual environment, and all dependencies properly configured. See the [documentation](https://obatechhub-inc.github.io/Pixella-chatbot/develop.html) for detailed development setup instructions.
 
 ### Manual Installation
 
@@ -511,6 +526,7 @@ If you see an error like `pixella: command not found`, it means the `pixella` co
 
 **For Linux/macOS users:**
 Reload your shell configuration:
+
 ```bash
 # For zsh
 source ~/.zshrc
@@ -521,6 +537,7 @@ source ~/.bashrc
 # For other shells, or if the above doesn't work, try sourcing ~/.profile
 source ~/.profile
 ```
+
 You may need to restart your terminal for changes to take full effect.
 
 **For Windows (Git Bash/WSL) users:**
@@ -562,6 +579,7 @@ Contributions are welcome! Feel free to:
 - Improve documentation
 
 Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

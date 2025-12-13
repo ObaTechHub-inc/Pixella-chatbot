@@ -28,11 +28,15 @@ Open your terminal and run one of the following commands:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh | sh
 ```
-
 or
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh | bash
+```
+or
+
+```bash
+bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/ObaTechHub-inc/Pixella-chatbot/main/scripts/install.sh)'
 ```
 
 After the script completes, follow the prompts for initial configuration.
@@ -41,15 +45,15 @@ After the script completes, follow the prompts for initial configuration.
 
 Before installing Pixella, ensure you have the following installed on your system:
 
-*   **Python**: Version 3.11 or higher. You can download it from [python.org](https://www.python.org/downloads/).
-*   **Git**: For cloning the repository. Download from [git-scm.com](https://git-scm.com/downloads).
-*   Internet connection (for dependencies)
+- **Python**: Version 3.11 or higher. You can download it from [python.org](https://www.python.org/downloads/).
+- **Git**: For cloning the repository. Download from [git-scm.com](https://git-scm.com/downloads).
+- Internet connection (for dependencies)
 
 The installation script will handle `pip` and virtual environment setup automatically.
 
 ## Step-by-Step Installation
 
-If you prefer a manual setup or need to troubleshoot, follow these steps:
+If you prefer a manual setup or need to troubleshoot, Also recommend for developers(contributors), follow these steps:
 
 ### 1. Clone the Repository
 
@@ -70,22 +74,22 @@ python3 -m venv .venv
 
 Activate the virtual environment:
 
-*   **On macOS/Linux (Bash/Zsh):**
-    ```bash
-    source .venv/bin/activate
-    ```
-*   **On Windows (Git Bash/WSL):**
-    ```bash
-    source .venv/Scripts/activate
-    ```
-*   **On Windows (Command Prompt):**
-    ```bash
-    .\.venv\Scripts\activate.bat
-    ```
-*   **On Windows (PowerShell):**
-    ```powershell
-    .\.venv\Scripts\Activate.ps1
-    ```
+- **On macOS/Linux (Bash/Zsh):**
+  ```bash
+  source .venv/bin/activate
+  ```
+- **On Windows (Git Bash/WSL):**
+  ```bash
+  source .venv/Scripts/activate
+  ```
+- **On Windows (Command Prompt):**
+  ```bash
+  .\.venv\Scripts\activate.bat
+  ```
+- **On Windows (PowerShell):**
+  ```powershell
+  .\.venv\Scripts\Activate.ps1
+  ```
 
 ### 3. Install Dependencies
 
@@ -113,19 +117,19 @@ You can verify that Pixella is installed correctly by running its version comman
 pixella --version
 ```
 
-You should see version `1.20.7` of Pixella displayed.
+You should see version `v1.20.7` of Pixella displayed.
 
 ## Running the Chatbot
 
 After installation, you can run Pixella in two main modes:
 
-*   **CLI Interactive Mode**:
-    ```bash
-    pixella cli --interactive
-    ```
-*   **Web UI Mode**:
-    ```bash
-    pixella ui
-    ```
+- **CLI Interactive Mode**:
+  ```bash
+  pixella cli --interactive
+  ```
+- **Web UI Mode**:
+  ```bash
+  pixella ui
+  ```
 
 For more details on usage, refer to `get-started.md`.

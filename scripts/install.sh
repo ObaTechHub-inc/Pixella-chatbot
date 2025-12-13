@@ -10,10 +10,38 @@
 
 set -e  # Exit on any error
 
-# If stdin is not a terminal, attach to tty
-if [ ! -t 0 ]; then
-    exec < /dev/tty
+exec </dev/tty || true
+
+# Determine if running in interactive mode
+INTERACTIVE=1
+if [ ! -t 0 ] && [ ! -t 1 ]; then
+    INTERACTIVE=0
 fi
+
+# Function to ask user for input with default value
+ask() {
+    local prompt="$1"
+    local default="$2"
+    local var="$3"
+    local input=""
+
+    if [ "$INTERACTIVE" -ne 1 ]; then
+        eval "$var=\"$default\""
+        [ -n "$default" ] && print_warning "$prompt [$default] (auto)"
+        return
+    fi
+
+    printf '%s' "$prompt" > /dev/tty
+    [ -n "$default" ] && printf ' [%s]' "$default" > /dev/tty
+    printf ': ' > /dev/tty
+
+    if read -r input < /dev/tty; then
+        eval "$var=\"${input:-$default}\""
+    else
+        eval "$var=\"$default\""
+    fi
+}
+
 
 # Trap to cleanup on error
 trap 'cleanup_on_error' ERR
@@ -48,7 +76,7 @@ VENV_ACTIVATE_CMD=""
 VENV_PYTHON_BIN=""
 
 # Version list - Update this when new releases are available
-VERSION_LIST="1.0.0 1.20.0 1.20.4 1.20.5 1.20.7"
+VERSION_LIST="v1.0.0 v1.20.0 v1.20.4 v1.20.5 v1.20.7"
 
 # Function to check if version exists in list
 version_exists() {
@@ -61,25 +89,57 @@ version_exists() {
     return 1
 }
 
-# Function to find latest version for a prefix (e.g., "1.20" -> "1.20.7")
-find_latest_for_prefix() {
-    local prefix="$1"
-    local latest_version=""
-    for version in $VERSION_LIST; do
-        case "$version" in
-            "$prefix".*)
-                if [ -z "$latest_version" ]; then
-                    latest_version="$version"
-                else
-                    # Simple string comparison for version numbers
-                    if [ "$version" \> "$latest_version" ]; then
-                        latest_version="$version"
-                    fi
-                fi
-                ;;
-        esac
+# Function to compare two version strings (returns true if first > second)
+version_greater() {
+    local v1="$1"
+    local v2="$2"
+
+    # Remove 'v' prefix for comparison
+    v1="${v1#v}"
+    v2="${v2#v}"
+
+    # Split versions into arrays
+    IFS='.' read -ra VER1 <<< "$v1"
+    IFS='.' read -ra VER2 <<< "$v2"
+
+    # Compare each part
+    for i in 0 1 2; do
+        local part1="${VER1[$i]:-0}"
+        local part2="${VER2[$i]:-0}"
+
+        if [ "$part1" -gt "$part2" ]; then
+            return 0  # v1 > v2
+        elif [ "$part1" -lt "$part2" ]; then
+            return 1  # v1 < v2
+        fi
     done
-    echo "$latest_version"
+
+    return 1  # equal or v1 <= v2
+}
+
+# Function to safely checkout a version with proper error handling
+checkout_version() {
+    local version="$1"
+    local current_version
+
+    current_version=$(git describe --tags --dirty --always 2>/dev/null || echo "unknown")
+
+    git fetch --tags --force
+
+    if git rev-parse "$version" >/dev/null 2>&1; then
+        print_step "Switching to version $version..."
+        if git checkout "$version" 2>/dev/null; then
+            print_success "Switched to version $version"
+            return 0
+        else
+            print_error "Failed to checkout $version"
+            return 1
+        fi
+    else
+        print_warning "Tag $version not found, staying on current ($current_version)"
+        VERSION="$current_version"
+        return 1
+    fi
 }
 
 # Functions
@@ -116,20 +176,20 @@ detect_os() {
         Linux*) 
             OS_TYPE="Linux"
             VENV_ACTIVATE_CMD="source \"$VENV_DIR/bin/activate\""
-            VENV_PYTHON_BIN="\"$VENV_DIR/bin/python\""
+            VENV_PYTHON_BIN="$VENV_DIR/bin/python"
             print_success "Detected Linux"
             ;;
         Darwin*) 
             OS_TYPE="macOS"
             VENV_ACTIVATE_CMD="source \"$VENV_DIR/bin/activate\""
-            VENV_PYTHON_BIN="\"$VENV_DIR/bin/python\""
+            VENV_PYTHON_BIN="$VENV_DIR/bin/python"
             print_success "Detected macOS"
             ;;
         CYGWIN*|MINGW32*|MSYS*|windows*) 
             OS_TYPE="Windows"
             # WSL/Git Bash compatible activation
             VENV_ACTIVATE_CMD="source \"$VENV_DIR/Scripts/activate\""
-            VENV_PYTHON_BIN="\"$VENV_DIR/Scripts/python.exe\"" # Use python.exe for clarity
+            VENV_PYTHON_BIN="$VENV_DIR/Scripts/python.exe" # Use python.exe for clarity
             print_warning "Detected Windows. Using WSL/Git Bash compatible commands."
             print_warning "For native PowerShell/CMD, manual steps may be needed for PATH."
             ;;
@@ -152,7 +212,7 @@ detect_installation_mode() {
         # We're inside the cloned repo
         PROJECT_ROOT="$SCRIPT_PARENT"
         INSTALLATION_MODE="local"
-        print_success "Local installation detected (already in cloned repo)"
+        print_success "Local installation detected (already in cloned repo: $PROJECT_ROOT)"
     else
         # We're standalone - need to clone
         INSTALLATION_MODE="remote"
@@ -164,35 +224,84 @@ detect_installation_mode() {
 # Function to resolve version input
 resolve_version() {
     local input="$1"
-    
+
+    # Get available versions dynamically
+    local available_versions=""
+    if [ -d "$PROJECT_ROOT" ]; then
+        cd "$PROJECT_ROOT"
+        git fetch --tags --force >/dev/null 2>&1
+        available_versions=$(git tag 2>/dev/null | tr '\n' ' ')
+        cd - >/dev/null
+    else
+        # Fallback to hardcoded list if repo not cloned yet
+        available_versions="$VERSION_LIST"
+    fi
+
     # Handle special keywords
-    case "$input" in
-        latest)
-            echo "1.20.7"
-            return 0
-            ;;
-        prerelease)
-            echo "1.0.0"
-            return 0
-            ;;
-    esac
-    
-    # Check if exact version exists
-    if version_exists "$input"; then
-        echo "$input"
+    if [ "$input" = "latest" ]; then
+        # Find the latest version from available versions (highest version number)
+        local latest=""
+        for v in $available_versions; do
+            if [ -z "$latest" ] || version_greater "$v" "$latest"; then
+                latest="$v"
+            fi
+        done
+        echo "$latest"
+        return 0
+    elif [ "$input" = "prerelease" ]; then
+        # Find the prerelease version (lowest version number, typically earliest version)
+        local prerelease=""
+        for v in $available_versions; do
+            if [ -z "$prerelease" ] || version_greater "$prerelease" "$v"; then
+                prerelease="$v"
+            fi
+        done
+        echo "$prerelease"
         return 0
     fi
-    
-    # Handle partial versions (e.g., "1.20" -> latest in 1.20.x)
+
+    # Check if input already has v prefix
+    case "$input" in
+        v*)
+            # Input already has v prefix, check if it exists
+            for v in $available_versions; do
+                if [ "$v" = "$input" ]; then
+                    echo "$input"
+                    return 0
+                fi
+            done
+            ;;
+        *)
+            # Input doesn't have v prefix, try with v prefix
+            local v_input="v$input"
+            for v in $available_versions; do
+                if [ "$v" = "$v_input" ]; then
+                    echo "$v_input"
+                    return 0
+                fi
+            done
+            ;;
+    esac
+
+    # Handle partial versions (e.g., "1.20" -> latest in v1.20.x)
     if echo "$input" | grep -q '^[0-9]\+\.[0-9]\+$'; then
-        local latest_version
-        latest_version=$(find_latest_for_prefix "$input")
+        local latest_version=""
+        local v_prefix="v$input"
+        for version in $available_versions; do
+            case "$version" in
+                "$v_prefix".*)
+                    if [ -z "$latest_version" ] || version_greater "$version" "$latest_version"; then
+                        latest_version="$version"
+                    fi
+                    ;;
+            esac
+        done
         if [ -n "$latest_version" ]; then
             echo "$latest_version"
             return 0
         fi
     fi
-    
+
     # If no match found
     echo ""
     return 1
@@ -200,95 +309,130 @@ resolve_version() {
 
 select_version() {
     print_step "Selecting Pixella version..."
-    
-    print "${CYAN}Available versions:${NC}"
-    echo "  1.0.0   (prerelease)"
-    echo "  1.20.0, 1.20.4, 1.20.5, 1.20.7  (latest: 1.20.7)"
-    echo
+
+    # First clone/fetch repository to get available versions
+    if [ ! -d "$PROJECT_ROOT" ]; then
+        print_step "Fetching available versions from repository..."
+        mkdir -p "$INSTALL_DIR" || {
+            print_error "Failed to create installation directory $INSTALL_DIR"
+            exit 1
+        }
+
+        # Clone to temporary location to get tags
+        TEMP_DIR=$(mktemp -d)
+        if git clone "$REPO_URL" "$TEMP_DIR" 2>/dev/null; then
+            cd "$TEMP_DIR"
+            git fetch --tags --force >/dev/null 2>&1
+
+            print "${CYAN}Available versions:${NC}"
+            git tag | sort -V | while read -r tag; do
+                echo "  $tag"
+            done
+            echo
+
+            cd - >/dev/null
+            rm -rf "$TEMP_DIR"
+        else
+            print_warning "Could not fetch versions from repository, using cached list"
+            print "${CYAN}Available versions:${NC}"
+            echo "  v1.0.0   (prerelease)"
+            echo "  v1.20.0, v1.20.4, v1.20.5, v1.20.7  (latest: v1.20.7)"
+            echo
+        fi
+    else
+        cd "$PROJECT_ROOT"
+        git fetch --tags --force >/dev/null 2>&1
+
+        print "${CYAN}Available versions:${NC}"
+        git tag | sort -V | while read -r tag; do
+            echo "  $tag"
+        done
+        echo
+        cd - >/dev/null
+    fi
+
     print "${CYAN}You can specify:${NC}"
-    echo "  - Full version (e.g., 1.20.7)"
-    echo "  - Partial version (e.g., 1.20 -> gets latest 1.20.x)"
     echo "  - 'latest' -> gets the latest stable version"
     echo "  - 'prerelease' -> gets the prerelease version"
     echo
-    
+
     while true; do
-        read -p "Enter version: " input
+        ask "Enter version" "latest" input
         if [ -z "$input" ]; then
             print "${RED}Version cannot be empty.${NC}"
             continue
         fi
-        
+
         VERSION=$(resolve_version "$input")
         if [ -n "$VERSION" ]; then
             print_success "Selected version: $VERSION"
             break
         else
             print "${RED}Invalid version '$input'. Please try again.${NC}"
-            print "${YELLOW}Available options: 1.0.0, 1.20.0, 1.20.4, 1.20.5, 1.20.7, 1.20, 1.0, latest, prerelease${NC}"
+            print "${YELLOW}Available options: latest, prerelease, or specific version tags shown above${NC}"
         fi
     done
 }
 
 clone_repository() {
     print_step "Cloning Pixella repository..."
-    
-    # Record the selected version
-    echo "$VERSION" > "$INSTALL_DIR/.pixella_version" 2>/dev/null || true
-    
+
     if [ -d "$PROJECT_ROOT" ]; then
-        print_warning "Pixella directory already exists at $PROJECT_ROOT"
-        read -p "Do you want to update it? (y/n) " -n 1 -r
+        print_success "Local installation detected (already in cloned repo: $PROJECT_ROOT)"
+        ask "Do you want to update it?" "y" REPLY
         echo
+
         case $REPLY in
             [Yy]* )
-            cd "$PROJECT_ROOT" || {
-                print_error "Failed to change to directory $PROJECT_ROOT"
-                exit 1
-            }
-            if ! git pull origin main 2>/dev/null; then
-                print_warning "Git pull failed, will use existing files"
-            fi
-            if ! git checkout "$VERSION" 2>/dev/null; then
-                print_warning "Could not checkout version $VERSION, using current"
-                VERSION=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-            fi
-            ;;
+                cd "$PROJECT_ROOT" || {
+                    print_error "Failed to change to directory $PROJECT_ROOT"
+                    exit 1
+                }
+
+                git fetch origin
+                git fetch --tags --force
+
+                if ! git pull origin main 2>/dev/null; then
+                    print_warning "Git pull failed, using existing files"
+                fi
+
+                checkout_version "$VERSION"
+                ;;
             * )
-            print_success "Using existing installation at $PROJECT_ROOT"
-            if ! git checkout "$VERSION" 2>/dev/null; then
-                print_warning "Could not checkout version $VERSION, using current"
-                VERSION=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-            fi
-            return 0
-            ;;
+                print_success "Using existing installation at $PROJECT_ROOT"
+                cd "$PROJECT_ROOT" || exit 1
+
+                git fetch --tags --force
+
+                checkout_version "$VERSION"
+                ;;
         esac
     else
         mkdir -p "$INSTALL_DIR" || {
             print_error "Failed to create installation directory $INSTALL_DIR"
             exit 1
         }
+
+        echo "$VERSION" > "$INSTALL_DIR/.pixella_version" 2>/dev/null || true
+
         if ! git clone "$REPO_URL" "$PROJECT_ROOT"; then
             print_error "Failed to clone repository from $REPO_URL"
-            print_error "Please check your internet connection and repository URL"
             exit 1
         fi
-        cd "$PROJECT_ROOT" || {
-            print_error "Failed to change to cloned directory $PROJECT_ROOT"
+
+        cd "$PROJECT_ROOT" || exit 1
+
+        # 🔑 CRITICAL FIX: ensure tags exist
+        git fetch --tags --force
+
+        if ! checkout_version "$VERSION"; then
+            print_error "Version tag $VERSION not found."
+            print_error "Available tags:"
+            git tag
             exit 1
-        }
-        if ! git checkout "$VERSION"; then
-            print_error "Failed to checkout version $VERSION"
-            print_error "Available versions may have changed. Please check GitHub releases."
-            print_error "Attempting to continue with main branch..."
-            VERSION="main"
-            git checkout main 2>/dev/null || git checkout master 2>/dev/null || {
-                print_error "Could not checkout main/master branch either"
-                exit 1
-            }
         fi
     fi
-    
+
     print_success "Repository ready at $PROJECT_ROOT (version $VERSION)"
 }
 
@@ -297,7 +441,7 @@ manual_python_installation() {
     print_warning "Please download and install Python 3.11 from python.org"
     
     while true; do
-        read -p "Have you installed Python 3.11? (yes/no) " -n 1 -r
+        ask "Have you installed Python 3.11?" "n" REPLY
         echo
         case $REPLY in
             [Yy]* )
@@ -307,7 +451,7 @@ manual_python_installation() {
                 return 0
             else
                 print_error "Python 3.11 not found in PATH."
-                read -p "Continue with another Python version? (y/n) " -n 1 -r
+                ask "Continue with another Python version?" "y" REPLY
                 echo
                 case $REPLY in
                     [Nn]* )
@@ -320,7 +464,7 @@ manual_python_installation() {
             fi
             ;;
             [Nn]* )
-            read -p "Continue with another Python version? (y/n) " -n 1 -r
+            ask "Continue with another Python version?" "y" REPLY
             echo
             case $REPLY in
                 [Nn]* )
@@ -386,7 +530,7 @@ check_python_version() {
     fi
 
     print_warning "Python 3.11 is recommended."
-    read -p "Python 3.11 not found. Install it now? (y/n) " -n 1 -r
+    ask "Python 3.11 not found. Install it now?" "y" REPLY
     echo
     case $REPLY in
         [Yy]* )
@@ -479,10 +623,10 @@ create_and_activate_venv() {
             # Set activation commands based on OS
             if [ "$OS_TYPE" = "Windows" ]; then
                 VENV_ACTIVATE_CMD="source \"$VENV_DIR/Scripts/activate\""
-                VENV_PYTHON_BIN="\"$VENV_DIR/Scripts/python.exe\""
+                VENV_PYTHON_BIN="$VENV_DIR/Scripts/python.exe"
             else
                 VENV_ACTIVATE_CMD="source \"$VENV_DIR/bin/activate\""
-                VENV_PYTHON_BIN="\"$VENV_DIR/bin/python\""
+                VENV_PYTHON_BIN="$VENV_DIR/bin/python"
             fi
             
             # Try to activate and check dependencies
@@ -493,7 +637,7 @@ create_and_activate_venv() {
                     
                     # Even if everything is good, ask about version update
                     echo
-                    read -p "Do you want to update or downgrade Pixella version? (y/n) " -n 1 -r
+                    ask "Do you want to update or downgrade Pixella version?" "n" REPLY
                     echo
                     case $REPLY in
                         [Yy]* )
@@ -549,17 +693,17 @@ create_and_activate_venv() {
         echo
         
         while true; do
-            read -p "Select option (1 or 2): " choice
+            ask "Select option (1 or 2)" "1" choice
             case $choice in
                 1)
                     print_step "Creating virtual environment (.venv)..."
                     VENV_DIR=".venv"
                     if [ "$OS_TYPE" = "Windows" ]; then
                         VENV_ACTIVATE_CMD="source \"$VENV_DIR/Scripts/activate\""
-                        VENV_PYTHON_BIN="\"$VENV_DIR/Scripts/python.exe\""
+                        VENV_PYTHON_BIN="$VENV_DIR/Scripts/python.exe"
                     else
                         VENV_ACTIVATE_CMD="source \"$VENV_DIR/bin/activate\""
-                        VENV_PYTHON_BIN="\"$VENV_DIR/bin/python\""
+                        VENV_PYTHON_BIN="$VENV_DIR/bin/python"
                     fi
                     
                     "$PYTHON_CMD" -m venv "$VENV_DIR" || {
@@ -580,7 +724,7 @@ create_and_activate_venv() {
                 2)
                     print_warning "Installing dependencies in system Python (not recommended)."
                     print_warning "This may affect other Python applications on your system."
-                    read -p "Are you sure? (y/n) " -n 1 -r
+                    ask "Are you sure?" "n" REPLY
                     echo
                     case $REPLY in
                         [Yy]* )
@@ -601,7 +745,7 @@ create_and_activate_venv() {
         
         if [ -d ".venv" ]; then
             print_warning "Virtual environment already exists."
-            read -p "Do you want to recreate it? (y/n) " -n 1 -r
+            ask "Do you want to recreate it?" "n" REPLY
             echo
             case $REPLY in
                 [Yy]* )
@@ -613,10 +757,10 @@ create_and_activate_venv() {
                 VENV_DIR=".venv"
                 if [ "$OS_TYPE" = "Windows" ]; then
                     VENV_ACTIVATE_CMD="source \"$VENV_DIR/Scripts/activate\""
-                    VENV_PYTHON_BIN="\"$VENV_DIR/Scripts/python.exe\""
+                    VENV_PYTHON_BIN="$VENV_DIR/Scripts/python.exe"
                 else
                     VENV_ACTIVATE_CMD="source \"$VENV_DIR/bin/activate\""
-                    VENV_PYTHON_BIN="\"$VENV_DIR/bin/python\""
+                    VENV_PYTHON_BIN="$VENV_DIR/bin/python"
                 fi
                 
                 if eval "$VENV_ACTIVATE_CMD" 2>/dev/null; then
@@ -637,7 +781,7 @@ create_and_activate_venv() {
             echo
             
             while true; do
-                read -p "Select option (1 or 2): " choice
+                ask "Select option (1 or 2)" "1" choice
                 case $choice in
                     1)
                         create_venv="yes"
@@ -658,10 +802,10 @@ create_and_activate_venv() {
             VENV_DIR=".venv"
             if [ "$OS_TYPE" = "Windows" ]; then
                 VENV_ACTIVATE_CMD="source \"$VENV_DIR/Scripts/activate\""
-                VENV_PYTHON_BIN="\"$VENV_DIR/Scripts/python.exe\""
+                VENV_PYTHON_BIN="$VENV_DIR/Scripts/python.exe"
             else
                 VENV_ACTIVATE_CMD="source \"$VENV_DIR/bin/activate\""
-                VENV_PYTHON_BIN="\"$VENV_DIR/bin/python\""
+                VENV_PYTHON_BIN="$VENV_DIR/bin/python"
             fi
             
             "$PYTHON_CMD" -m venv "$VENV_DIR" || {
@@ -775,7 +919,7 @@ EOF
     
     # Prompt for API key and update using a Python script for cross-platform compatibility
     echo
-    read -p "Enter your Google API Key (or press Enter to skip): " API_KEY
+    ask "Enter your Google API Key (or press Enter to skip)" "" API_KEY
     if [ ! -z "$API_KEY" ]; then
         # Create a temporary Python script to update the .env file
         PYTHON_SCRIPT_PATH="$PROJECT_ROOT/scripts/update_env.py"
@@ -956,7 +1100,7 @@ main() {
                 echo
                 
                 while true; do
-                    read -p "Select option (1 or 2): " choice
+                    ask "Select option (1 or 2)" "1" choice
                     case $choice in
                         1)
                             VERSION="$saved_version"

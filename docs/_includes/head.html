@@ -1,4 +1,309 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+<meta charset="utf-8" />
+<meta name="theme-color" content="#121212" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+/>
 <link rel="stylesheet" href="{{ '/assets/css/custom.css' | relative_url }}" />
-<link rel="stylesheet" href="{{ '/assets/css/admonition.css' | relative_url }}" />
-<link rel="icon" sizes="180x180" href="{{ '/assets/favicons/favicon.png' | relative_url }}" />
+<link
+  rel="stylesheet"
+  href="{{ '/assets/css/admonition.css' | relative_url }}"
+/>
+<link
+  rel="icon"
+  sizes="180x180"
+  href="{{ '/assets/favicons/favicon.png' | relative_url }}"
+/>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Navigation toggle functionality
+    const navToggle = document.querySelector(".nav-toggle");
+    const navLinks = document.querySelector(".nav-links");
+
+    if (navToggle && navLinks) {
+      navToggle.addEventListener("click", function () {
+        const expanded = navToggle.getAttribute("aria-expanded") === "true";
+        navToggle.setAttribute("aria-expanded", !expanded);
+        navLinks.classList.toggle("open");
+        navToggle.classList.toggle("active");
+      });
+
+      // Close menu when clicking on a link
+      navLinks.addEventListener("click", function (e) {
+        if (e.target.tagName === "A") {
+          navLinks.classList.remove("open");
+          navToggle.classList.remove("active");
+          navToggle.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener("click", function (e) {
+        if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+          navLinks.classList.remove("open");
+          navToggle.classList.remove("active");
+          navToggle.setAttribute("aria-expanded", "false");
+        }
+      });
+    }
+
+    // Active navigation highlighting
+    const currentPath = window.location.pathname;
+    const navLinksArray = document.querySelectorAll(".nav-links a");
+
+    navLinksArray.forEach((link) => {
+      const linkPath = link.getAttribute("href");
+      if (
+        linkPath &&
+        (currentPath === linkPath ||
+          currentPath === linkPath.replace(".html", "") ||
+          currentPath.endsWith(linkPath))
+      ) {
+        link.classList.add("active");
+      }
+    });
+
+    // Documentation sidebar functionality
+    const sidebarToggle = document.querySelector(".docs-sidebar-toggle");
+    const sidebar = document.querySelector(".docs-sidebar");
+
+    if (sidebarToggle && sidebar) {
+      sidebarToggle.addEventListener("click", function () {
+        sidebar.classList.toggle("open");
+        const expanded = sidebar.classList.contains("open");
+        this.setAttribute("aria-expanded", expanded);
+        document.body.classList.toggle("sidebar-open", expanded);
+      });
+
+      // Close sidebar when clicking outside
+      document.addEventListener("click", function (e) {
+        if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+          sidebar.classList.remove("open");
+          sidebarToggle.setAttribute("aria-expanded", "false");
+          document.body.classList.remove("sidebar-open");
+        }
+      });
+
+      // Close sidebar on navigation
+      sidebar.addEventListener("click", function (e) {
+        if (e.target.tagName === "A") {
+          sidebar.classList.remove("open");
+          sidebarToggle.setAttribute("aria-expanded", "false");
+          document.body.classList.remove("sidebar-open");
+        }
+      });
+    }
+
+    // Active navigation highlighting for sidebar
+    const sidebarLinks = document.querySelectorAll(".docs-sidebar a");
+    sidebarLinks.forEach((link) => {
+      const linkPath = link.getAttribute("href");
+      if (
+        linkPath &&
+        (currentPath === linkPath ||
+          currentPath === linkPath.replace(".html", "") ||
+          currentPath.endsWith(linkPath))
+      ) {
+        link.classList.add("active");
+      }
+    });
+  });
+
+  // Table of contents generation
+  function generateTableOfContents() {
+    const content = document.querySelector(".main-content");
+    if (!content) return;
+
+    const headings = content.querySelectorAll("h1, h2, h3, h4, h5, h6");
+    if (headings.length < 2) return; // Don't generate TOC if less than 2 headings
+
+    // Create TOC container
+    const tocContainer = document.createElement("div");
+    tocContainer.className = "toc-container";
+    tocContainer.innerHTML = `
+      <div class="toc-toggle">
+        <button class="toc-toggle-btn" aria-expanded="false">
+          <i class="fas fa-list"></i> Table of Contents
+        </button>
+      </div>
+      <nav class="toc" aria-label="Table of contents"></nav>
+    `;
+
+    // Insert TOC after the first heading or at the top of content
+    const firstHeading = content.querySelector("h1, h2");
+    if (firstHeading) {
+      firstHeading.parentNode.insertBefore(
+        tocContainer,
+        firstHeading.nextSibling
+      );
+    } else {
+      content.insertBefore(tocContainer, content.firstChild);
+    }
+
+    // Generate TOC items
+    const tocList = tocContainer.querySelector(".toc");
+    let currentLevel = 0;
+    let currentList = tocList;
+
+    headings.forEach((heading, index) => {
+      const level = parseInt(heading.tagName.charAt(1));
+      const id = heading.id || `heading-${index}`;
+      heading.id = id;
+
+      const listItem = document.createElement("li");
+      listItem.className = `toc-item toc-h${level}`;
+      listItem.innerHTML = `<a href="#${id}">${heading.textContent}</a>`;
+
+      // Handle nesting
+      if (level > currentLevel) {
+        const subList = document.createElement("ul");
+        currentList.appendChild(subList);
+        currentList = subList;
+      } else if (level < currentLevel) {
+        for (let i = level; i < currentLevel; i++) {
+          if (
+            currentList.parentElement &&
+            currentList.parentElement.parentElement
+          ) {
+            currentList = currentList.parentElement.parentElement;
+          }
+        }
+      }
+
+      currentList.appendChild(listItem);
+      currentLevel = level;
+    });
+
+    // TOC toggle functionality
+    const tocToggleBtn = tocContainer.querySelector(".toc-toggle-btn");
+    const toc = tocContainer.querySelector(".toc");
+
+    tocToggleBtn.addEventListener("click", function () {
+      const expanded = this.getAttribute("aria-expanded") === "true";
+      this.setAttribute("aria-expanded", !expanded);
+      toc.classList.toggle("open");
+    });
+  }
+
+  // Search functionality
+  function initializeSearch() {
+    // Create search container
+    const searchContainer = document.createElement("div");
+    searchContainer.className = "search-container";
+    searchContainer.innerHTML = `
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search documentation..." aria-label="Search">
+        <button id="search-button" aria-label="Search">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      <div id="search-results" class="search-results" style="display: none;"></div>
+    `;
+
+    // Insert search after navigation
+    const nav = document.querySelector(".site-nav");
+    if (nav) {
+      nav.parentNode.insertBefore(searchContainer, nav.nextSibling);
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById("search-input");
+    const searchButton = document.getElementById("search-button");
+    const searchResults = document.getElementById("search-results");
+
+    let searchIndex = [];
+
+    // Build search index from page content
+    function buildSearchIndex() {
+      const content = document.querySelector(".main-content");
+      if (!content) return;
+
+      const headings = content.querySelectorAll("h1, h2, h3, h4, h5, h6");
+      const paragraphs = content.querySelectorAll("p");
+      const listItems = content.querySelectorAll("li");
+
+      headings.forEach((heading, index) => {
+        searchIndex.push({
+          text: heading.textContent.toLowerCase(),
+          element: heading,
+          type: "heading",
+          level: parseInt(heading.tagName.charAt(1)),
+        });
+      });
+
+      paragraphs.forEach((paragraph) => {
+        searchIndex.push({
+          text: paragraph.textContent.toLowerCase(),
+          element: paragraph,
+          type: "paragraph",
+        });
+      });
+
+      listItems.forEach((item) => {
+        searchIndex.push({
+          text: item.textContent.toLowerCase(),
+          element: item,
+          type: "list-item",
+        });
+      });
+    }
+
+    function performSearch(query) {
+      if (!query.trim()) {
+        searchResults.style.display = "none";
+        return;
+      }
+
+      const results = searchIndex
+        .filter((item) => item.text.includes(query.toLowerCase()))
+        .slice(0, 10); // Limit to 10 results
+
+      if (results.length === 0) {
+        searchResults.innerHTML = "<p>No results found.</p>";
+      } else {
+        searchResults.innerHTML = results
+          .map((result) => {
+            const preview =
+              result.text.substring(0, 100) +
+              (result.text.length > 100 ? "..." : "");
+            return `<div class="search-result" data-type="${result.type}">
+            <a href="#${result.element.id || ""}">${preview}</a>
+          </div>`;
+          })
+          .join("");
+      }
+
+      searchResults.style.display = "block";
+    }
+
+    // Event listeners
+    searchButton.addEventListener("click", () => {
+      performSearch(searchInput.value);
+    });
+
+    searchInput.addEventListener("input", (e) => {
+      performSearch(e.target.value);
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        performSearch(e.target.value);
+      } else if (e.key === "Escape") {
+        searchResults.style.display = "none";
+        searchInput.blur();
+      }
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!searchContainer.contains(e.target)) {
+        searchResults.style.display = "none";
+      }
+    });
+
+    // Build index on load
+    buildSearchIndex();
+  }
+</script>

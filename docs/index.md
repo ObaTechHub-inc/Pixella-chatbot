@@ -3,14 +3,14 @@ layout: default
 title: Home
 description: Documentation for Pixella Chatbot
 ---
+
 # Welcome to PixelAI Docs
 
-{% include admonition.html 
-     type="note" 
-     title="Getting Started" 
-     content="Remember to read all the guides to set up PixelAI properly." 
+{% include admonition.html
+     type="note"
+     title="Getting Started"
+     content="Remember to read all the guides to set up PixelAI properly."
 %}
-
 
 # Pixella Documentation
 
@@ -19,13 +19,15 @@ description: Documentation for Pixella Chatbot
 Pixella is a powerful, open-source AI assistant designed to enhance your productivity and streamline your workflows. With both a flexible Command-Line Interface (CLI) and an intuitive Web User Interface (UI), Pixella provides easy access to cutting-edge AI capabilities directly from your terminal or browser. It's built to be easily configurable and extendable, allowing you to tailor its behavior to your specific needs.
 
 ## What's New
+
 For the latest updates and features in Pixella, check out the [What's New](whats-new.md) page.
 
 ## Table of Contents
 
 Here you can find information on how to get started, install, and set up Pixella.
 
-*   [Get Started](get-started.md)
-*   [Installation](installation.md)
-*   [Setup](setup.md)
-*   [What's New](whats-new.md)
+- [Get Started](get-started.md)
+- [Installation](installation.md)
+- [Setup](setup.md)
+- [Development](develop.md)
+- [What's New](whats-new.md)

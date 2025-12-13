@@ -10,15 +10,15 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 
 ### Reporting Bugs
 
-*   Ensure the bug hasn't already been reported.
-*   When reporting, use a clear and descriptive title.
-*   Include as much detail as possible: steps to reproduce, expected behavior, actual behavior, screenshots (if applicable), and your environment (OS, Python version, Pixella version).
+- Ensure the bug hasn't already been reported.
+- When reporting, use a clear and descriptive title.
+- Include as much detail as possible: steps to reproduce, expected behavior, actual behavior, screenshots (if applicable), and your environment (OS, Python version, Pixella version).
 
 ### Suggesting Enhancements
 
-*   Use a clear and descriptive title.
-*   Explain why this enhancement would be useful.
-*   Provide concrete examples where appropriate.
+- Use a clear and descriptive title.
+- Explain why this enhancement would be useful.
+- Provide concrete examples where appropriate.
 
 ### Code Contributions
 
@@ -33,83 +33,105 @@ Please note that this project is released with a [Contributor Code of Conduct](C
     git checkout -b feature/your-feature-name-or-bugfix/issue-number
     ```
 4.  **Set up your development environment**:
-    *   Ensure you have Python 3.9+ installed.
-    *   Create and activate a virtual environment:
-        ```bash
-        python3 -m venv venv
-        source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-        ```
-    *   Install project dependencies:
-        ```bash
-        pip install -r requirements.txt
-        ```
-    *   Configure your `.env` file (refer to `Pixella/config.py` for details or run `pixella config --init`).
-    *   use this `gitignore` template to avoid committing unnecessary files:
-        ```
-        # Byte-compiled / optimized / DLL files
-          __pycache__/
-          *.py[cod]
-          *$py.class
 
-        # C extensions
-           *.so
+    **Recommended: Use the automated installation script**
 
-        # Distribution / packaging
-           .Python
-           build/
-           dist/
-           download/
-           /lib/
-           wheels/
-           pip-wheel-metadata/
-           share/python-wheels/
-           MANIFEST
-        # PyInstaller
-          *.manifest
-          *.spec
+    ```bash
+    # Clone the repository
+    git clone https://github.com/DominionDev-coder/Pixella-chatbot.git
+    cd Pixella-chatbot
 
-        # Unit test / coverage reports
-           *.cover
-           *.py,cover
-           .pytest_cache/
+    # Run the installation script (recommended for developers)
+    bash scripts/install.sh
+    ```
 
-        # git files
-           .gitignore
+    This script will automatically:
 
-        # Environment variables
-            .env
-            .env.bak
-            .env.local
-            .env.*.local
-            .env.template
+    - Set up Python 3.11+ and virtual environment
+    - Install all dependencies
+    - Configure your environment
+    - Set up the `pixella` command
 
-        # IDEs
-            .vscode/
-            .idea/
-            *.swp
-            *.swo
-            *~
-            .DS_Store
+    **Alternative: Manual setup**
 
-        # Streamlit
-            .streamlit/
+    - Ensure you have Python 3.11+ installed.
+    - Create and activate a virtual environment:
+      ```bash
+      python3 -m venv .venv
+      source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+      ```
+    - Install project dependencies:
+      ```bash
+      pip install -r requirements.txt
+      ```
+    - Configure your `.env` file (refer to `Pixella/config.py` for details or run `pixella config --init`).
+    - use this `gitignore` template to avoid committing unnecessary files:
 
-        # Logs
-            *.log
-            logs/
+      ```
+      # Byte-compiled / optimized / DLL files
+        __pycache__/
+        *.py[cod]
+        *$py.class
 
-        # memory and database files
-            data
-            db
+      # C extensions
+         *.so
 
-        ```
+      # Distribution / packaging
+         .Python
+         build/
+         dist/
+         download/
+         /lib/
+         wheels/
+         pip-wheel-metadata/
+         share/python-wheels/
+         MANIFEST
+      # PyInstaller
+        *.manifest
+        *.spec
+
+      # Unit test / coverage reports
+         *.cover
+         *.py,cover
+         .pytest_cache/
+
+      # git files
+         .gitignore
+
+      # Environment variables
+          .env
+          .env.bak
+          .env.local
+          .env.*.local
+          .env.template
+
+      # IDEs
+          .vscode/
+          .idea/
+          *.swp
+          *.swo
+          *~
+          .DS_Store
+
+      # Streamlit
+          .streamlit/
+
+      # Logs
+          *.log
+          logs/
+
+      # memory and database files
+          data
+          db
+
+      ```
 
 5.  **Make your changes**:
-    *   **Focus on necessary changes**: Only modify the parts of the code directly relevant to your feature or bug fix. Avoid making unrelated stylistic or refactoring changes in the same pull request.
-    *   **Avoid committing ignored files**: Do not commit files that are typically ignored (e.g., `venv/`, `__pycache__/`, `.env` files). Refer to the recommended `.gitignore` template in `README.md` for details.
-    *   Follow existing code style and conventions.
-    *   Add unit tests for new features or bug fixes.
-    *   Ensure all existing tests pass.
+    - **Focus on necessary changes**: Only modify the parts of the code directly relevant to your feature or bug fix. Avoid making unrelated stylistic or refactoring changes in the same pull request.
+    - **Avoid committing ignored files**: Do not commit files that are typically ignored (e.g., `venv/`, `__pycache__/`, `.env` files). Refer to the recommended `.gitignore` template in `README.md` for details.
+    - Follow existing code style and conventions.
+    - Add unit tests for new features or bug fixes.
+    - Ensure all existing tests pass.
 6.  **Run tests**:
     ```bash
     python -m pytest
@@ -124,12 +146,13 @@ Please note that this project is released with a [Contributor Code of Conduct](C
     git push origin feature/your-feature-name-or-bugfix/issue-number
     ```
 9.  **Open a Pull Request** on GitHub:
-    *   Provide a descriptive title and detailed explanation of your changes.
-    *   Reference any related issues.
+    - Provide a descriptive title and detailed explanation of your changes.
+    - Reference any related issues.
 
 ## Style Guides
 
-*   **Python**: Adhere to PEP 8 guidelines. We use `flake8` and `black` for linting and formatting.
-*   **Documentation**: Use Markdown for documentation files.
+- **Python**: Adhere to PEP 8 guidelines. We use `flake8` and `black` for linting and formatting.
+- **Documentation**: Use Markdown for documentation files.
 
 Thank you for contributing to Pixella!
+[Read the Docs](https://obatechhub-inc.github.io/Pixella-chatbot/) for more information on setting up your development environment and developing.
