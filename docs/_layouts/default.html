@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ page.title | default: site.description }}</title>
+    <title>{{ page.title | default: site.title }}</title>
     <meta
       name="description"
       content="{{ page.description | default: site.description }}"
@@ -16,7 +16,10 @@
     <nav class="site-nav" role="navigation">
       <div class="nav-container">
         <div class="nav-brand">
-          <a href="{{ '/' | relative_url }}">Pixella</a>
+          <a href="{{ '/' | relative_url }}">
+            <img src="{{ '/assets/images/pixella-logo.png' | relative_url }}" alt="Pixella Logo" class="nav-logo">
+            Pixella Chatbot
+          </a>
         </div>
         <button
           class="nav-toggle"
