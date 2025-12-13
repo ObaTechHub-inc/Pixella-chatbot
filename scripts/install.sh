@@ -355,11 +355,20 @@ clear_pip_cache() {
 # Install dependencies (optimized)
 ###############################################################################
 install_requirements() {
-  step "Upgrading pip, setuptools, and wheel..."
-  "$PYTHON_CMD" -m pip install --upgrade pip setuptools wheel
+  step "Preparing dependency installation (NumPy compatibility fix)..."
 
-  step "Installing Python dependencies (binary-preferred)..."
-  "$PYTHON_CMD" -m pip install --prefer-binary -r requirements.txt
+  # Hard pin NumPy < 2 to avoid pyarrow binary crash
+  "$PYTHON_CMD" -m pip install --upgrade pip setuptools wheel
+  "$PYTHON_CMD" -m pip install "numpy<2"
+
+  ok "NumPy pinned to < 2 (pyarrow compatibility)"
+
+  step "Installing Python dependencies..."
+
+  "$PYTHON_CMD" -m pip install \
+    --prefer-binary \
+    --no-build-isolation \
+    -r requirements.txt
 
   ok "Dependencies installed"
 }
@@ -372,20 +381,18 @@ verify_pyarrow() {
   step "Verifying pyarrow installation..."
 
   if ! "$PYTHON_CMD" - <<'EOF'
-import pyarrow
-print(pyarrow.__version__)
+import pyarrow, numpy
+print("pyarrow:", pyarrow.__version__)
+print("numpy:", numpy.__version__)
 EOF
   then
-    err "pyarrow failed to install properly."
-    err "This system may not support pyarrow wheels."
-    err "Please try:"
-    err "  Python 3.11"
-    err "  A newer OS version"
-    err "  Or install pyarrow manually"
+    err "pyarrow failed to load"
+    err "This system may not support current wheels"
+    err "Please ensure Python 3.11 and NumPy < 2"
     exit 1
   fi
 
-  ok "pyarrow is working"
+  ok "pyarrow verified"
 }
 
 
