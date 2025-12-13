@@ -74,7 +74,6 @@ a {
 }
 
 a:hover {
-  text-decoration: underline;
   color: var(--primary);
 }
 
@@ -141,14 +140,6 @@ a:hover {
   font-weight: bold;
   font-size: 1.5rem;
   color: var(--text);
-  display: flex;
-  align-items: center;
-}
-
-.nav-logo {
-  width: 30px;
-  height: 30px;
-  margin-right: 10px;
 }
 
 .nav-links {
@@ -304,6 +295,10 @@ pre code {
    #RESPONSIVE DESIGN
    ========================================================================== */
 @media (max-width: 1024px) {
+  .page-wrapper {
+    display: block;
+  }
+
   .docs-sidebar,
   .docs-sidebar-toggle {
     display: none;
@@ -319,36 +314,31 @@ pre code {
     display: block;
     background: none;
     border: none;
-    font-size: 1.5rem;
     cursor: pointer;
     z-index: 1100;
-  }
-
-  .hamburger {
-    display: block;
-    width: 25px;
-    height: 3px;
-    background-color: var(--text);
+    width: 30px;
+    height: 30px;
     position: relative;
-    transition: transform 0.3s ease-in-out;
   }
 
+  .hamburger,
   .hamburger::before,
   .hamburger::after {
-    content: "";
+    content: '';
+    display: block;
+    background-color: var(--text);
     position: absolute;
     width: 100%;
     height: 3px;
-    background-color: var(--text);
-    transition: transform 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
   }
 
   .hamburger::before {
-    top: -8px;
+    top: -10px;
   }
 
   .hamburger::after {
-    bottom: -8px;
+    bottom: -10px;
   }
 
   .nav-toggle.active .hamburger {
@@ -356,13 +346,13 @@ pre code {
   }
 
   .nav-toggle.active .hamburger::before {
-    transform: translate(0, 8px) rotate(90deg);
     top: 0;
+    transform: rotate(90deg);
   }
 
   .nav-toggle.active .hamburger::after {
-    transform: translate(0, -8px) rotate(90deg);
     bottom: 0;
+    transform: rotate(90deg);
   }
 
   .nav-links {

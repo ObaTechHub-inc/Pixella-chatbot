@@ -1,6 +1,7 @@
 ---
 layout: default
 title: What's New
+
 ---
 
 # What's New in Pixella v1.20 (1.20.7)

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Get Started
+
 ---
 
 # Getting Started with Pixella

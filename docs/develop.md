@@ -1,3 +1,9 @@
+---
+layout: default
+title: Development Setup Guide
+
+---
+
 # 🚀 Development Setup Guide
 
 This guide outlines the recommended setup process for developers and contributors working on Pixella.
