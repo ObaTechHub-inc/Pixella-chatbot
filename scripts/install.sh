@@ -179,35 +179,61 @@ select_version() {
   tags="$(git ls-remote --tags "$REPO_URL" 2>/dev/null | awk -F/ '{print $NF}' | grep -v '\^{}' | sort -V || true)"
 
   if [ -z "$tags" ]; then
-    err "Failed to fetch versions (network or GitHub issue)."
+    err "Failed to fetch versions."
     exit 1
   fi
 
   print ""
-  print "Available versions:"
+  print "Available options:"
+  print "  latest   (recommended. stable and released version)"
+  print "  main     (development branch)"
+  print ""
+
+  print "Available release versions:"
   while IFS= read -r tag; do
     print "  $tag"
   done <<< "$tags"
   print ""
 
   while true; do
-    ask "Enter version (or 'latest')" "latest" input
+    ask "Enter version" "latest" input
 
-    if [ "$input" = "latest" ]; then
-      VERSION="$(printf "%s\n" "$tags" | tail -n 1)"
-      ok "Using latest version: $VERSION"
-      return
-    fi
+    case "$input" in
+      latest)
+        VERSION="$(printf "%s\n" "$tags" | tail -n 1)"
+        VERSION_MODE="release"
+        ok "Using latest stable release: $VERSION"
+        return
+        ;;
+      main)
+        VERSION="main"
+        VERSION_MODE="main"
+        warn "⚠ You selected 'main'"
+        warn "This branch may be unstable due to ongoing development."
+        warn "Recommended only for developers, bug fixers,"
+        warn "or users testing new features."
+        ask "Continue with unstable 'main' branch?" "n" confirm
+        case "$confirm" in
+          y|Y) ;;
+          *) err "Installation aborted."; exit 1 ;;
+        esac
 
-    if printf "%s\n" "$tags" | grep -qx "$input"; then
-      VERSION="$input"
-      ok "Selected version: $VERSION"
-      return
-    fi
+        return
+        ;;
+      *)
+        if printf "%s\n" "$tags" | grep -qx "$input"; then
+          VERSION="$input"
+          VERSION_MODE="release"
+          ok "Selected release version: $VERSION"
+          return
+        fi
+        ;;
+    esac
 
-    warn "Invalid version, try again."
+    warn "Invalid selection, try again."
   done
 }
+
 
 ###############################################################################
 # Python detection
@@ -254,8 +280,15 @@ clone_repository() {
   fi
 
   cd "$PROJECT_ROOT"
+  git fetch origin
   git fetch --tags --force
-  git checkout "$VERSION"
+
+  if [ "$VERSION_MODE" = "main" ]; then
+    git checkout main
+  else
+    git checkout "tags/$VERSION"
+  fi
+
 
   if [ ! -f "$PROJECT_ROOT/requirements.txt" ]; then
     err "Invalid Pixella project structure, please report this error on GitHub, We'll fix it"
@@ -325,25 +358,34 @@ install_requirements() {
   step "Upgrading pip, setuptools, and wheel..."
   "$PYTHON_CMD" -m pip install --upgrade pip setuptools wheel
 
-  step "Clearing pip cache (optional but recommended for fresh installs)..."
-  "$PYTHON_CMD" -m pip cache purge || true
-
-  step "Installing Python dependencies..."
-  # Pre-download pyarrow wheel to avoid slow builds
-  PYARROW_VERSION="11.0.0"
-  pip_download_dir=".wheelhouse"
-  mkdir -p "$pip_download_dir"
-
-  # Download pyarrow wheel only if not present
-  if [ ! -f "$pip_download_dir/pyarrow-$PYARROW_VERSION-*.whl" ]; then
-    "$PYTHON_CMD" -m pip download --only-binary=:all: pyarrow=="$PYARROW_VERSION" -d "$pip_download_dir"
-  fi
-
-  # Install everything using local wheel cache first
-  "$PYTHON_CMD" -m pip install --no-cache-dir --prefer-binary \
-      --find-links="$pip_download_dir" -r requirements.txt
+  step "Installing Python dependencies (binary-preferred)..."
+  "$PYTHON_CMD" -m pip install --prefer-binary -r requirements.txt
 
   ok "Dependencies installed"
+}
+
+
+###############################################################################
+# Verify pyarrow installation
+###############################################################################
+verify_pyarrow() {
+  step "Verifying pyarrow installation..."
+
+  if ! "$PYTHON_CMD" - <<'EOF'
+import pyarrow
+print(pyarrow.__version__)
+EOF
+  then
+    err "pyarrow failed to install properly."
+    err "This system may not support pyarrow wheels."
+    err "Please try:"
+    err "  Python 3.11"
+    err "  A newer OS version"
+    err "  Or install pyarrow manually"
+    exit 1
+  fi
+
+  ok "pyarrow is working"
 }
 
 
@@ -451,6 +493,7 @@ main() {
   create_and_activate_venv
   clear_pip_cache
   install_requirements
+  verify_pyarrow
   setup_env_file
   export_to_path
   finish
