@@ -302,6 +302,25 @@ create_and_activate_venv() {
   esac
 }
 
+
+###############################################################################
+# Clear pip cache
+###############################################################################
+clear_pip_cache() {
+  ask "Clear pip cache to avoid old packages? [y/N]" "N" ans
+  case "$ans" in
+    y|Y)
+      step "Clearing pip cache..."
+      "$PYTHON_CMD" -m pip cache purge
+      ok "Pip cache cleared"
+      ;;
+    *)
+      warn "Skipping pip cache cleanup"
+      ;;
+  esac
+}
+
+
 ###############################################################################
 # Install dependencies
 ###############################################################################
@@ -311,6 +330,7 @@ install_requirements() {
   "$PYTHON_CMD" -m pip install -r requirements.txt
   ok "Dependencies installed"
 }
+
 
 ###############################################################################
 # Environment setup
