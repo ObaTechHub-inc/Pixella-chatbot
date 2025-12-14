@@ -422,7 +422,7 @@ create_env_template() {
 # required fields are marked with required
 GOOGLE_API_KEY=          # your Google API key (required)
 GOOGLE_AI_MODEL=gemini-2.5-flash  # Google AI model to use
-USERNAME=                # your username (optional)
+USER_NAME=                # your username (optional)
 USER_PERSONA=           # your persona or hobby (optional)
 ALWAYS_DEBUG=false      # set to true to always enable debug mode
 DISABLE_COLORS=false    # set to true to disable colored output
@@ -493,11 +493,11 @@ setup_env_file() {
     warn "No AI model provided, using default(gemini-2.5-flash)"
   fi
 
-  # USERNAME
+  # USER_NAME
   ask "Enter your username (optional)" "" USERNAME
   if [ -n "$USERNAME" ]; then
-    set_env_var "USERNAME" "$USERNAME"
-    ok "USERNAME set to $USERNAME"
+    set_env_var "USER_NAME" "$USERNAME"
+    ok "User name set to $USERNAME"
   else
     warn "No username provided, you may set it later in .env"
   fi
@@ -506,7 +506,7 @@ setup_env_file() {
   ask "Enter your persona or hobby (optional)" "" PERSONA
   if [ -n "$PERSONA" ]; then
     set_env_var "USER_PERSONA" "$PERSONA"
-    ok "USER_PERSONA set to $PERSONA"
+    ok "User persona set to $PERSONA"
   else
     warn "No persona provided, you may set it later in .env"
   fi
@@ -573,6 +573,8 @@ finish() {
   print ""
   print "Try:"
   print "  pixella --help"
+  print "Note: please run pixella config --init to update variables in case of mistakes"
+  print "or try: pixella config --show to view current configuration."
 }
 
 ###############################################################################
