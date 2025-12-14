@@ -573,6 +573,7 @@ main() {
   clear_pip_cache
   install_requirements
   verify_pyarrow
+  create_env_template
   setup_env_file
   export_to_path
   finish
