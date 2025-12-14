@@ -420,7 +420,7 @@ setup_env_file() {
   ENV_FILE="$PROJECT_ROOT/.env"
   ENV_TEMPLATE="$PROJECT_ROOT/.env.template"
   [ -f "$ENV_FILE" ] || cp "$ENV_TEMPLATE" "$ENV_FILE" 2>/dev/null || true
-
+  # Configure Google API Key
   ask "Enter Google API Key (optional)" "" API_KEY
   if [ -n "$API_KEY" ]; then
     sed -i.bak "s/^GOOGLE_API_KEY=.*/GOOGLE_API_KEY=$API_KEY/" "$ENV_FILE" || true
@@ -428,6 +428,31 @@ setup_env_file() {
   else
     warn "No API key provided"
   fi
+  # configure Google AI Model
+  ask "Enter Google AI Model (default: gemini-2.5-flash)" "gemini-2.5-flash" AI_MODEL
+  if [ -n "$AI_MODEL" ]; then
+    sed -i.bak "s/^GOOGLE_AI_MODEL=.*/GOOGLE_AI_MODEL=$AI_MODEL/" "$ENV_FILE" || true
+    ok "AI Model set to $AI_MODEL"
+  else
+    warn "Using default AI Model, You may need to change it later"
+  fi
+  # configure username
+  ask "Enter your username (optional)" "" USERNAME
+  if [ -n "$USERNAME" ]; then
+    sed -i.bak "s/^USERNAME=.*/USERNAME=$USERNAME/" "$ENV_FILE" || true
+    ok "Username set to $USERNAME"
+  else
+    warn "No username provided, skipping"
+  fi
+  # configure user persona
+  ask "Enter your persona or your hobby (optional)" "" PERSONA
+  if [ -n "$PERSONA" ]; then
+    sed -i.bak "s/^USER_PERSONA=.*/USER_PERSONA=$PERSONA/" "$ENV_FILE" || true
+    ok "Persona set to $PERSONA"
+  else
+    warn "No persona provided, skipping"
+  fi
+  
 }
 
 ###############################################################################
