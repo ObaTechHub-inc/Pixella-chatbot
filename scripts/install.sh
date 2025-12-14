@@ -262,7 +262,7 @@ check_python_version() {
 update_bin_pixella() {
   step "updating bin/pixella Python command..."
 
-  sed -i.bak "s|^PYTHON_CMD=.*$|PYTHON_CMD=\"python3.11\"|" "$PROJECT_ROOT/bin/pixella" || true
+  sed -i.bak "s|^PYTHON_CMD=.*$|PYTHON_CMD=\"$PYTHON_CMD\"|" "$PROJECT_ROOT/bin/pixella" || true
   rm -f "$PROJECT_ROOT/bin/pixella.bak"
   ok "bin/pixella updated to use detected system Python"
   return
@@ -285,7 +285,7 @@ clone_repository() {
         cd "$PROJECT_ROOT"
         git fetch origin
         git fetch --tags --force
-        git pull || true
+        git status --porcelain | grep -q . && warn "Local changes detected, skipping pull" || git pull
         ;;
       *)
         ok "Using existing repository"
@@ -444,45 +444,73 @@ EOL
 ###############################################################################
 setup_env_file() {
   step "Environment configuration..."
+
   ENV_FILE="$PROJECT_ROOT/.env"
   ENV_TEMPLATE="$PROJECT_ROOT/.env.template"
-  # Create .env if it doesn't exist
-  touch "$ENV_FILE"
-  # Copy template if .env is empty
-  [ -f "$ENV_FILE" ] || cp "$ENV_TEMPLATE" "$ENV_FILE" 2>/dev/null || true
-  # Configure Google API Key
-  ask "Enter Google API Key (optional)" "" API_KEY
+
+  # Ensure template exists
+  if [ ! -f "$ENV_TEMPLATE" ]; then
+    err ".env.template not found. This should not happen."
+    exit 1
+  fi
+
+  # Create .env from template if it doesn't exist
+  if [ ! -f "$ENV_FILE" ]; then
+    step "Creating .env from .env.template..."
+    cp "$ENV_TEMPLATE" "$ENV_FILE"
+    ok ".env created"
+  else
+    warn ".env already exists, preserving user values"
+  fi
+
+  # Helper to set or append env vars
+  set_env_var() {
+    local key="$1"
+    local value="$2"
+
+    if grep -q "^${key}=" "$ENV_FILE"; then
+      sed -i.bak "s|^${key}=.*|${key}=${value}|" "$ENV_FILE"
+    else
+      echo "${key}=${value}" >> "$ENV_FILE"
+    fi
+  }
+
+  # GOOGLE_API_KEY
+  ask "Enter Google API Key (required)" "" API_KEY
   if [ -n "$API_KEY" ]; then
-    sed -i.bak "s/^GOOGLE_API_KEY=.*/GOOGLE_API_KEY=$API_KEY/" "$ENV_FILE" || true
-    ok "API key saved"
+    set_env_var "GOOGLE_API_KEY" "$API_KEY"
+    ok "GOOGLE_API_KEY set"
   else
-    warn "No API key provided"
+    warn "No API key provided (Pixella may not work)"
   fi
-  # configure Google AI Model
-  ask "Enter Google AI Model (default: gemini-2.5-flash)" "gemini-2.5-flash" AI_MODEL
+
+  # GOOGLE_AI_MODEL
+  ask "Enter Google AI Model" "gemini-2.5-flash" AI_MODEL
   if [ -n "$AI_MODEL" ]; then
-    sed -i.bak "s/^GOOGLE_AI_MODEL=.*/GOOGLE_AI_MODEL=$AI_MODEL/" "$ENV_FILE" || true
-    ok "AI Model set to $AI_MODEL"
+    set_env_var "GOOGLE_AI_MODEL" "$AI_MODEL"
+    ok "AI model set to $AI_MODEL"
   else
-    warn "Using default AI Model, You may need to change it later"
+    warn "No AI model provided, using default(gemini-2.5-flash)"
   fi
-  # configure username
+
+  # USERNAME
   ask "Enter your username (optional)" "" USERNAME
   if [ -n "$USERNAME" ]; then
-    sed -i.bak "s/^USERNAME=.*/USERNAME=$USERNAME/" "$ENV_FILE" || true
-    ok "Username set to $USERNAME"
+    set_env_var "USERNAME" "$USERNAME"
+    ok "USERNAME set to $USERNAME"
   else
-    warn "No username provided, skipping"
+    warn "No username provided, you may set it later in .env"
   fi
-  # configure user persona
-  ask "Enter your persona or your hobby (optional)" "" PERSONA
+
+  # USER_PERSONA
+  ask "Enter your persona or hobby (optional)" "" PERSONA
   if [ -n "$PERSONA" ]; then
-    sed -i.bak "s/^USER_PERSONA=.*/USER_PERSONA=$PERSONA/" "$ENV_FILE" || true
-    ok "Persona set to $PERSONA"
+    set_env_var "USER_PERSONA" "$PERSONA"
+    ok "USER_PERSONA set to $PERSONA"
   else
-    warn "No persona provided, skipping"
+    warn "No persona provided, you may set it later in .env"
   fi
-  
+
 }
 
 ###############################################################################
@@ -559,7 +587,6 @@ main() {
   check_git
   select_version
   check_python_version
-  update_bin_pixella
 
   [ "$INSTALLATION_MODE" = "remote" ] && clone_repository
 
@@ -569,6 +596,7 @@ main() {
     exit 1
   fi
 
+  update_bin_pixella
   create_and_activate_venv
   clear_pip_cache
   install_requirements
