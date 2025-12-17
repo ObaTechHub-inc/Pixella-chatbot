@@ -85,12 +85,14 @@ cleanup_on_error() {
 }
 trap cleanup_on_error ERR
 
+update_error_ignore() {
 # If the repo already exists and installation mode is remote, do not cleanup on error(especially for updates)
 if [ -d "$INSTALL_DIR/$REPO_NAME" ] && [ -d "$INSTALL_DIR/$REPO_NAME/.git" ]; then
-  trap - ERR
   warn "Update failed, existing installation preserved."
   exit 0
 fi
+}
+trap update_error_ignore ERR
 
 ###############################################################################
 # Header & user preview
