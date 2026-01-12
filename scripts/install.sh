@@ -562,6 +562,9 @@ export_to_path() {
   step "Configuring PATH..."
 
   BIN_DIR="$PROJECT_ROOT/bin"
+  
+  # make sure the script is runnable
+  chmod +x "$BIN_DIR/pixella"
 
   # Detect user shell
   USER_SHELL="$(basename "$SHELL")"
